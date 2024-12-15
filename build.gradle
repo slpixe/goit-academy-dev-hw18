@@ -1,0 +1,76 @@
+import java.util.Properties
+
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.5'
+	id 'io.spring.dependency-management' version '1.1.6'
+	id "org.flywaydb.flyway" version "9.22.3"
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter:3.4.0'
+	implementation 'org.springframework.boot:spring-boot-starter-web:3.4.0'
+	implementation 'org.springframework.boot:spring-boot-starter-security:3.4.0'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf:3.4.0'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.4.0'
+	implementation 'org.postgresql:postgresql:42.7.4'
+	implementation 'jakarta.validation:jakarta.validation-api:3.1.0'
+	implementation 'org.springframework.boot:spring-boot-starter-validation:3.4.0'
+	implementation 'org.slf4j:slf4j-api:2.0.16'
+	implementation 'ch.qos.logback:logback-classic:1.5.7'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test:6.4.1'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.mockito:mockito-junit-jupiter:5.14.1'
+	testImplementation 'org.mockito:mockito-core:5.14.1'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+}
+
+// Load .env file
+def loadEnvProperties() {
+	def envFile = file('.env')
+	if (!envFile.exists()) {
+		throw new GradleException(".env file not found in project root directory")
+	}
+
+	def props = new Properties()
+	envFile.withInputStream { stream ->
+		props.load(stream)
+	}
+	return props
+}
+
+// Set Flyway properties using .env values
+def envProps = loadEnvProperties()
+flyway {
+	url = envProps.getProperty('GOIT_DB2_URL')
+	user = envProps.getProperty('GOIT_DB_USER')
+	password = envProps.getProperty('GOIT_DB_PASS')
+	locations = ['filesystem:src/main/resources/db/migration']
+	cleanDisabled = false
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
