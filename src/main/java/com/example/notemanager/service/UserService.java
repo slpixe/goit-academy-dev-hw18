@@ -6,7 +6,6 @@ import com.example.notemanager.model.User;
 import com.example.notemanager.model.dto.request.UserCreateRequest;
 import com.example.notemanager.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,6 +57,7 @@ public class UserService {
             return "User already exists";
         }
 
+        log.info("Creating user {}", request.userName());
         User user = User.builder()
                 .userName(request.userName())
                 .password(apiPasswordEncoder.encode(request.password()))
