@@ -3,7 +3,6 @@ package com.example.notemanager.controller;
 import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.model.Note;
 import com.example.notemanager.model.User;
-import com.example.notemanager.model.dto.response.NoteResponse;
 import com.example.notemanager.service.NoteService;
 import com.example.notemanager.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(NoteController.class)
+@WebMvcTest(NoteMvcController.class)
 class NoteControllerTest {
 
     @Autowired

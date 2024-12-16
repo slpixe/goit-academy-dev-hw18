@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/notes")
 @RequiredArgsConstructor
-public class NoteAPIController {
+public class NoteApiController {
 
     private final NoteService noteService;
 
     @GetMapping()
     public Page<NoteResponse> listAll(@RequestParam(defaultValue = "0") int page,
-                                        @RequestParam(defaultValue = "10") int size) {
+                                      @RequestParam(defaultValue = "10") int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         return noteService.listAll(pageRequest);
     }
@@ -61,16 +61,4 @@ public class NoteAPIController {
         return noteService.create(note);
     }
 
-//    @GetMapping
-//    public Page<NoteResponse> getNotes(
-//            @RequestParam(required = false) String keyword,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "10") int size) {
-//        PageRequest pageRequest = PageRequest.of(page, size);
-//        if (keyword != null && !keyword.isEmpty()) {
-//            return noteService.search(keyword, pageRequest);
-//        } else {
-//            return noteService.listAll(pageRequest);
-//        }
-//    }
 }

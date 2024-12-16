@@ -6,7 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-@ControllerAdvice(assignableTypes = {NoteController.class})
+@ControllerAdvice(assignableTypes = {NoteMvcController.class})
 @RequiredArgsConstructor
 public class UserNameController {
     private final UserService userService;

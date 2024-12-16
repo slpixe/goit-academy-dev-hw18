@@ -21,7 +21,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @RequestMapping("/note")
 @RequiredArgsConstructor
-public class NoteController {
+public class NoteMvcController {
     private static final String REDIRECT_NOTE_LIST = "redirect:/note/list";
 
     private final NoteService noteService;

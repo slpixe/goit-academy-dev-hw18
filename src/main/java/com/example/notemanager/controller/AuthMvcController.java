@@ -1,12 +1,14 @@
 package com.example.notemanager.controller;
 
 import com.example.notemanager.model.User;
+import com.example.notemanager.repository.UserRepository;
 import com.example.notemanager.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,12 +21,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDateTime;
 
 @Controller
-@RequiredArgsConstructor
-public class AuthController {
-    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+public class AuthMvcController {
+    private static final Logger log = LoggerFactory.getLogger(AuthMvcController.class);
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder mvcPasswordEncoder;
+
+    public AuthMvcController(UserService userService,
+                       @Qualifier("mvcPassEncoder") PasswordEncoder mvcPasswordEncoder) {
+        this.userService = userService;
+        this.mvcPasswordEncoder = mvcPasswordEncoder;
+    }
+
     private static final int MAX_FAILED_LOGIN_ATTEMPTS = 2;
     private static final int ACCOUNT_LOCK_DURATION_MINUTES = 15;
 
@@ -49,7 +57,7 @@ public class AuthController {
                 return "redirect:/login?error=LockedOut";
             }
 
-            if (!passwordEncoder.matches(password, user.getPassword())) {
+            if (!mvcPasswordEncoder.matches(password, user.getPassword())) {
                 log.warn("Invalid credentials for user {}", username);
                 userService.incrementFailedAttempts(username);
                 if (user.getFailedAttempts() >= MAX_FAILED_LOGIN_ATTEMPTS) {
