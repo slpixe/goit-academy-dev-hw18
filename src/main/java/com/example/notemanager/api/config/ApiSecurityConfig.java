@@ -1,7 +1,5 @@
 package com.example.notemanager.api.config;
 
-import com.example.notemanager.mvc.exception.EntityException;
-import com.example.notemanager.mvc.exception.ExceptionMessages;
 import com.example.notemanager.model.User;
 import com.example.notemanager.api.security.JwtRequestFilter;
 import com.example.notemanager.service.UserService;

@@ -1,7 +1,7 @@
 package com.example.notemanager.service;
 
-import com.example.notemanager.mvc.exception.ExceptionMessages;
-import com.example.notemanager.mvc.exception.NoteServiceException;
+import com.example.notemanager.exception.ExceptionMessages;
+import com.example.notemanager.exception.NoteServiceException;
 import com.example.notemanager.model.Note;
 import com.example.notemanager.model.User;
 import com.example.notemanager.model.dto.response.NoteResponse;

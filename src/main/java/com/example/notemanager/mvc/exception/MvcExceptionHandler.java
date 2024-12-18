@@ -1,5 +1,7 @@
 package com.example.notemanager.mvc.exception;
 
+import com.example.notemanager.exception.EntityException;
+import com.example.notemanager.exception.NoteServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -10,8 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice(basePackages = "com.example.notemanager.mvc")
-public class GlobalExceptionHandler {
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+public class MvcExceptionHandler {
+    private static final Logger log = LoggerFactory.getLogger(MvcExceptionHandler.class);
 
     @ExceptionHandler({NoteServiceException.class, EntityException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)

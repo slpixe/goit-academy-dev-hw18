@@ -1,7 +1,7 @@
 package com.example.notemanager.mvc.config;
 
-import com.example.notemanager.mvc.exception.EntityException;
-import com.example.notemanager.mvc.exception.ExceptionMessages;
+import com.example.notemanager.exception.EntityException;
+import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.model.User;
 import com.example.notemanager.service.UserService;
 import org.slf4j.Logger;
