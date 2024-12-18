@@ -3,6 +3,7 @@ package com.example.notemanager.controller;
 import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.model.Note;
 import com.example.notemanager.model.User;
+import com.example.notemanager.model.dto.response.NoteResponse;
 import com.example.notemanager.service.NoteService;
 import com.example.notemanager.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,7 +38,6 @@ class NoteControllerTest {
     @MockBean
     private UserService userService;
 
-    @MockBean
     private User mockUser;
 
     @BeforeEach
@@ -52,9 +52,9 @@ class NoteControllerTest {
 
     @Test
     void listAllWhenNotesExist() throws Exception {
-        Note note1 = Note.builder().id(1L).title("title 1").content("content 1").build();
-        Note note2 = Note.builder().id(2L).title("title 2").content("content 2").build();
-        Note note3 = Note.builder().id(3L).title("title 3").content("content 3").build();
+        NoteResponse note1 = new NoteResponse("title 1", "content 1");
+        NoteResponse note2 = new NoteResponse("title 1", "content 1");
+        NoteResponse note3 = new NoteResponse("title 1", "content 1");
 
         int page = 0;
         int size = 2;
@@ -97,12 +97,14 @@ class NoteControllerTest {
 
     @Test
     void editByIdUpdatesNoteAndRedirectsToList() throws Exception {
-        Note updatedNote = Note.builder().id(1L).title("Updated Title").content("Updated Content").build();
+        Note noteToUpdate = Note.builder().id(1L).title("Updated Title").content("Updated Content").build();
 
-        when(noteService.update(any(Note.class))).thenReturn(updatedNote);
+        NoteResponse updatedNoteResponse = NoteResponse.builder().title("Updated Title").content("Updated Content").build();
+
+        when(noteService.update(any(Note.class))).thenReturn(updatedNoteResponse);
 
         mockMvc.perform(post("/note/edit")
-                        .flashAttr("note", updatedNote)
+                        .flashAttr("note", noteToUpdate)
                         .with(csrf())
                         .with(user("mockUser").roles("USER")))
                 .andExpect(status().is3xxRedirection())
@@ -150,12 +152,14 @@ class NoteControllerTest {
 
     @Test
     void createNewNoteRedirectsToList() throws Exception {
-        Note newNote = Note.builder().title("new title").content("new content").build();
+        Note noteToCreate = Note.builder().title("New Title").content("New Content").build();
 
-        when(noteService.create(any(Note.class))).thenReturn(newNote);
+        NoteResponse createdNoteResponse = NoteResponse.builder().title("New Title").content("New Content").build();
+
+        when(noteService.create(any(Note.class))).thenReturn(createdNoteResponse);
 
         mockMvc.perform(post("/note/create")
-                        .flashAttr("note", newNote)
+                        .flashAttr("note", noteToCreate)
                         .with(csrf())
                         .with(user("mockUser").roles("USER")))
                 .andExpect(status().is3xxRedirection())
