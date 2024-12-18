@@ -1,6 +1,6 @@
-package com.example.notemanager.security;
+package com.example.notemanager.api.security;
 
-import com.example.notemanager.util.JwtUtil;
+import com.example.notemanager.api.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

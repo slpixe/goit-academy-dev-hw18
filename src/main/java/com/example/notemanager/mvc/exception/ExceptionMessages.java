@@ -1,4 +1,4 @@
-package com.example.notemanager.exception;
+package com.example.notemanager.mvc.exception;
 
 public enum ExceptionMessages {
     NOTE_NOT_FOUND("Note not found"),

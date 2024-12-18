@@ -1,4 +1,4 @@
-package com.example.notemanager.util;
+package com.example.notemanager.api.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

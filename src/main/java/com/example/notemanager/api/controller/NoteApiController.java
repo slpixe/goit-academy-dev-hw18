@@ -1,4 +1,4 @@
-package com.example.notemanager.controller;
+package com.example.notemanager.api.controller;
 
 import com.example.notemanager.model.Note;
 import com.example.notemanager.model.dto.response.NoteResponse;

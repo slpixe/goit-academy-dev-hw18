@@ -1,11 +1,9 @@
-package com.example.notemanager.controller;
+package com.example.notemanager.mvc.controller;
 
 import com.example.notemanager.model.User;
-import com.example.notemanager.repository.UserRepository;
 import com.example.notemanager.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;

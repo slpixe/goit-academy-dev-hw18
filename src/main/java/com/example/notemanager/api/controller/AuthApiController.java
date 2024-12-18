@@ -1,9 +1,9 @@
-package com.example.notemanager.controller;
+package com.example.notemanager.api.controller;
 
 import com.example.notemanager.model.dto.request.UserCreateRequest;
 import com.example.notemanager.model.dto.request.UserLoginRequest;
 import com.example.notemanager.service.UserService;
-import com.example.notemanager.util.JwtUtil;
+import com.example.notemanager.api.util.JwtUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

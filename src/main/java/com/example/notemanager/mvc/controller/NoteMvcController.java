@@ -1,7 +1,7 @@
-package com.example.notemanager.controller;
+package com.example.notemanager.mvc.controller;
 
-import com.example.notemanager.exception.ExceptionMessages;
-import com.example.notemanager.exception.NoteServiceException;
+import com.example.notemanager.mvc.exception.ExceptionMessages;
+import com.example.notemanager.mvc.exception.NoteServiceException;
 import com.example.notemanager.model.Note;
 import com.example.notemanager.model.dto.response.NoteResponse;
 import com.example.notemanager.service.NoteService;

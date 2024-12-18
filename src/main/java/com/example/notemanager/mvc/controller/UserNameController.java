@@ -1,4 +1,4 @@
-package com.example.notemanager.controller;
+package com.example.notemanager.mvc.controller;
 
 import com.example.notemanager.service.UserService;
 import lombok.RequiredArgsConstructor;
