@@ -4,6 +4,7 @@ import com.example.notemanager.model.Note;
 import com.example.notemanager.model.dto.response.NoteResponse;
 import com.example.notemanager.service.NoteService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -34,7 +35,7 @@ public class NoteApiController {
     }
 
     @GetMapping("/{id}")
-    public NoteResponse getById(@PathVariable Long id) {
+    public NoteResponse getById(@PathVariable @Positive Long id) {
         Note note = noteService.getById(id);
         return NoteResponse.builder()
                 .title(note.getTitle())
@@ -44,12 +45,12 @@ public class NoteApiController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
+    public void delete(@PathVariable @Positive Long id) {
         noteService.delete(id);
     }
 
     @PutMapping("/{id}")
-    public NoteResponse edit(@PathVariable Long id,
+    public NoteResponse edit(@PathVariable @Positive Long id,
                                      @Valid @RequestBody Note note) {
         note.setId(id);
         return noteService.update(note);
