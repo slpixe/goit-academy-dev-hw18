@@ -66,10 +66,6 @@ public class ApiSecurityConfig {
         return username -> {
             log.info("Loading user: {}", username);
             User user = userService.findByUserName(username);
-            if (user == null) {
-                log.error("User not found: {}", username);
-                throw new EntityException(ExceptionMessages.USER_NOT_FOUND.getMessage());
-            }
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getUserName())
                     .password(user.getPassword())
