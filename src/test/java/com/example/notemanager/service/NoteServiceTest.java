@@ -4,7 +4,6 @@ import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.exception.NoteServiceException;
 import com.example.notemanager.model.Note;
 import com.example.notemanager.model.User;
-import com.example.notemanager.model.dto.response.NoteResponse;
 import com.example.notemanager.repository.NoteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,13 +21,12 @@ import static org.mockito.Mockito.*;
 class NoteServiceTest {
     private NoteService noteService;
     private NoteRepository noteRepository;
-    private UserService userService;
     private User mockUser;
 
     @BeforeEach
     void setUp() {
         noteRepository = mock(NoteRepository.class);
-        userService = mock(UserService.class);
+        UserService userService = mock(UserService.class);
         noteService = new NoteService(noteRepository, userService);
 
         mockUser = new User();
@@ -40,9 +38,11 @@ class NoteServiceTest {
     @Test
     void listAllReturnsEmptyListWhenNoNotesExist() {
         PageRequest pageRequest = PageRequest.of(0, 5);
-        when(noteRepository.findByUser(mockUser, pageRequest)).thenReturn(Page.empty(pageRequest));
+        Page<Note> emptyPage = Page.empty(pageRequest);
 
-        Page<NoteResponse> result = noteService.listAll(pageRequest);
+        when(noteRepository.findByUser(mockUser, pageRequest)).thenReturn(emptyPage);
+
+        Page<Note> result = noteService.listAll(pageRequest);
 
         assertNotNull(result, "Result should not be null.");
         assertTrue(result.isEmpty(), "Expected no notes in the page.");
@@ -62,12 +62,14 @@ class NoteServiceTest {
 
         when(noteRepository.findByUser(mockUser, pageRequest)).thenReturn(notePage);
 
-        Page<NoteResponse> result = noteService.listAll(pageRequest);
+        Page<Note> result = noteService.listAll(pageRequest);
 
         assertNotNull(result, "Result should not be null.");
-        assertEquals(2, result.getContent().size(), "The page should contain 2 notes.");
-        assertEquals(3, result.getTotalElements(), "Total elements should match.");
-        assertEquals(2, result.getTotalPages(), "Total pages should match.");
+        assertEquals(2, result.getContent().size(), "The page should contain the correct number of notes.");
+        assertTrue(result.getContent().contains(note1), "The page should contain note1.");
+        assertTrue(result.getContent().contains(note2), "The page should contain note2.");
+        assertEquals(3, result.getTotalElements(), "Total elements should match the expected count.");
+        assertEquals(2, result.getTotalPages(), "Total pages should match the expected count.");
         assertEquals(page, result.getNumber(), "Current page number should match the requested page.");
     }
 
@@ -78,15 +80,14 @@ class NoteServiceTest {
 
         when(noteRepository.save(inputNote)).thenReturn(savedNote);
 
-        NoteResponse result = noteService.create(inputNote);
+        Note result = noteService.create(inputNote);
 
-        assertNotNull(result, "Result should not be null.");
-        assertEquals("title", result.title(), "Titles should match.");
-        assertEquals("content", result.content(), "Content should match.");
+        assertNotNull(result);
+        assertEquals(savedNote, result, "The saved note should match the returned note.");
 
         ArgumentCaptor<Note> captor = ArgumentCaptor.forClass(Note.class);
         verify(noteRepository).save(captor.capture());
-        assertEquals(mockUser, captor.getValue().getUser(), "Note user should match authenticated user.");
+        assertEquals(mockUser, captor.getValue().getUser());
     }
 
     @Test
@@ -105,7 +106,7 @@ class NoteServiceTest {
 
         Note result = noteService.getById(1L);
 
-        assertNotNull(result, "Result should not be null.");
+        assertNotNull(result);
         assertEquals(note, result, "The returned note should match the existing note.");
     }
 
@@ -125,10 +126,11 @@ class NoteServiceTest {
         when(noteRepository.findByIdAndUser(1L, mockUser)).thenReturn(Optional.of(existingNote));
         when(noteRepository.save(existingNote)).thenReturn(existingNote);
 
-        NoteResponse result = noteService.update(updatedNote);
+        Note result = noteService.update(updatedNote);
 
-        assertEquals("new title", result.title(), "Titles should match.");
-        assertEquals("new content", result.content(), "Contents should match.");
+        assertEquals(existingNote, result);
+        assertEquals("new title", result.getTitle());
+        assertEquals("new content", result.getContent());
     }
 
     @Test

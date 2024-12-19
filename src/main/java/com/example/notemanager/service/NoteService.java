@@ -4,7 +4,6 @@ import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.exception.NoteServiceException;
 import com.example.notemanager.model.Note;
 import com.example.notemanager.model.User;
-import com.example.notemanager.model.dto.response.NoteResponse;
 import com.example.notemanager.repository.NoteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,30 +17,27 @@ public class NoteService {
     private final NoteRepository noteRepository;
     private final UserService userService;
 
-    public Page<NoteResponse> listAll(PageRequest pageRequest) {
+    public Page<Note> listAll(PageRequest pageRequest) {
         User currentUser = getAuthenticatedUser();
-        return noteRepository.findByUser(currentUser, pageRequest)
-                .map(this::mapToResponse);
+        return noteRepository.findByUser(currentUser, pageRequest);
     }
 
     public Note getById(long id) {
         return findNoteByIdAndUser(id, getAuthenticatedUser());
     }
 
-    public NoteResponse create(Note note) {
+    public Note create(Note note) {
         validateNoteData(note);
         note.setUser(getAuthenticatedUser());
-        Note savedNote = noteRepository.save(note);
-        return mapToResponse(savedNote);
+        return noteRepository.save(note);
     }
 
     @Transactional
-    public NoteResponse update(Note note) {
+    public Note update(Note note) {
         Note existingNote = findNoteByIdAndUser(note.getId(), getAuthenticatedUser());
         existingNote.setTitle(note.getTitle());
         existingNote.setContent(note.getContent());
-        Note updatedNote = noteRepository.save(existingNote);
-        return mapToResponse(updatedNote);
+        return noteRepository.save(existingNote);
     }
 
     public void delete(long id) {
@@ -49,10 +45,9 @@ public class NoteService {
         noteRepository.delete(note);
     }
 
-    public Page<NoteResponse> search(String keyword, PageRequest pageRequest) {
+    public Page<Note> search(String keyword, PageRequest pageRequest) {
         User currentUser = getAuthenticatedUser();
-        return noteRepository.findByUserAndKeyword(currentUser, keyword, pageRequest)
-                .map(this::mapToResponse);
+        return noteRepository.findByUserAndKeyword(currentUser, keyword, pageRequest);
     }
 
     private User getAuthenticatedUser() {
@@ -70,10 +65,4 @@ public class NoteService {
         }
     }
 
-    private NoteResponse mapToResponse(Note note) {
-        return NoteResponse.builder()
-                .title(note.getTitle())
-                .content(note.getContent())
-                .build();
-    }
 }

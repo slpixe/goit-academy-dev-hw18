@@ -3,7 +3,6 @@ package com.example.notemanager.mvc.controller;
 import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.exception.NoteServiceException;
 import com.example.notemanager.model.Note;
-import com.example.notemanager.model.dto.response.NoteResponse;
 import com.example.notemanager.service.NoteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class NoteMvcController {
     public ModelAndView listAll(@RequestParam(defaultValue = "0") int page,
                                 @RequestParam(defaultValue = "10") int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<NoteResponse> notePage = noteService.listAll(pageRequest);
+        Page<Note> notePage = noteService.listAll(pageRequest);
 
         ModelAndView modelAndView = new ModelAndView("note/list");
         modelAndView.addObject("notes", notePage.getContent());
@@ -83,7 +82,7 @@ public class NoteMvcController {
                                     @RequestParam(defaultValue = "0") int page,
                                     @RequestParam(defaultValue = "10") int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        Page<NoteResponse> notePage = noteService.search(keyword, pageRequest);
+        Page<Note> notePage = noteService.search(keyword, pageRequest);
 
         ModelAndView modelAndView = new ModelAndView("note/list");
         modelAndView.addObject("notes", notePage.getContent());

@@ -3,7 +3,6 @@ package com.example.notemanager.controller;
 import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.model.Note;
 import com.example.notemanager.model.User;
-import com.example.notemanager.model.dto.response.NoteResponse;
 import com.example.notemanager.mvc.controller.NoteMvcController;
 import com.example.notemanager.service.NoteService;
 import com.example.notemanager.service.UserService;
@@ -39,13 +38,11 @@ class NoteControllerTest {
     @MockBean
     private UserService userService;
 
-    private User mockUser;
-
     @BeforeEach
     void setUp() {
         Mockito.reset(noteService);
 
-        mockUser = new User();
+        User mockUser = new User();
         mockUser.setId(1L);
         mockUser.setUserName("mockUser");
         when(userService.getAuthenticatedUser()).thenReturn(mockUser);
@@ -53,15 +50,15 @@ class NoteControllerTest {
 
     @Test
     void listAllWhenNotesExist() throws Exception {
-        NoteResponse note1 = new NoteResponse("title 1", "content 1");
-        NoteResponse note2 = new NoteResponse("title 1", "content 1");
-        NoteResponse note3 = new NoteResponse("title 1", "content 1");
+        Note note1 = Note.builder().id(1L).title("title 1").content("content 1").build();
+        Note note2 = Note.builder().id(2L).title("title 2").content("content 2").build();
+        Note note3 = Note.builder().id(3L).title("title 3").content("content 3").build();
 
         int page = 0;
         int size = 2;
         PageRequest pageRequest = PageRequest.of(page, size);
         // simulate behaviour of a Page: 2 notes on the page, pagination parameters, 3 - total number of items
-        Page<NoteResponse> notePage = new PageImpl<>(List.of(note1, note2), pageRequest, 3);
+        Page<Note> notePage = new PageImpl<>(List.of(note1, note2), pageRequest, 3);
 
         when(noteService.listAll(pageRequest)).thenReturn(notePage);
 
@@ -98,14 +95,12 @@ class NoteControllerTest {
 
     @Test
     void editByIdUpdatesNoteAndRedirectsToList() throws Exception {
-        Note noteToUpdate = Note.builder().id(1L).title("Updated Title").content("Updated Content").build();
+        Note updatedNote = Note.builder().id(1L).title("Updated Title").content("Updated Content").build();
 
-        NoteResponse updatedNoteResponse = NoteResponse.builder().title("Updated Title").content("Updated Content").build();
-
-        when(noteService.update(any(Note.class))).thenReturn(updatedNoteResponse);
+        when(noteService.update(any(Note.class))).thenReturn(updatedNote);
 
         mockMvc.perform(post("/note/edit")
-                        .flashAttr("note", noteToUpdate)
+                        .flashAttr("note", updatedNote)
                         .with(csrf())
                         .with(user("mockUser").roles("USER")))
                 .andExpect(status().is3xxRedirection())
@@ -153,14 +148,12 @@ class NoteControllerTest {
 
     @Test
     void createNewNoteRedirectsToList() throws Exception {
-        Note noteToCreate = Note.builder().title("New Title").content("New Content").build();
+        Note newNote = Note.builder().title("new title").content("new content").build();
 
-        NoteResponse createdNoteResponse = NoteResponse.builder().title("New Title").content("New Content").build();
-
-        when(noteService.create(any(Note.class))).thenReturn(createdNoteResponse);
+        when(noteService.create(any(Note.class))).thenReturn(newNote);
 
         mockMvc.perform(post("/note/create")
-                        .flashAttr("note", noteToCreate)
+                        .flashAttr("note", newNote)
                         .with(csrf())
                         .with(user("mockUser").roles("USER")))
                 .andExpect(status().is3xxRedirection())
