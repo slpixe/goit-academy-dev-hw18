@@ -1,11 +1,8 @@
 package com.example.notemanager.api.model.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
 
-@Data
-@AllArgsConstructor
-public class ErrorResponse {
-    private int status;
-    private String message;
+@Builder
+public record ErrorResponse(int status,
+                           String message) {
 }
