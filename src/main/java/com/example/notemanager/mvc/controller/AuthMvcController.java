@@ -1,7 +1,7 @@
 package com.example.notemanager.mvc.controller;
 
 import com.example.notemanager.model.User;
-import com.example.notemanager.mvc.security.LoginAttemptService;
+import com.example.notemanager.service.LoginAttemptService;
 import com.example.notemanager.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;

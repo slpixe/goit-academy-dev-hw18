@@ -1,7 +1,6 @@
-package com.example.notemanager.mvc.security;
+package com.example.notemanager.service;
 
 import com.example.notemanager.model.User;
-import com.example.notemanager.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

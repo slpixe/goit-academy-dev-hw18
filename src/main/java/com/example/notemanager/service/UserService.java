@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.function.Consumer;
 
 @Service
 public class UserService {
@@ -54,30 +55,26 @@ public class UserService {
 
     @Transactional
     public void incrementFailedAttempts(String username) {
-        User user = findByUserName(username);
-        if (user != null) {
-            user.setFailedAttempts(user.getFailedAttempts() + 1);
-            userRepository.save(user);
-        }
+        updateUser(username, user -> user.setFailedAttempts(user.getFailedAttempts() + 1));
     }
 
     @Transactional
     public void resetFailedAttempts(String username) {
-        User user = findByUserName(username);
-        if (user != null) {
-            user.setFailedAttempts(0);
-            userRepository.save(user);
-        }
+        updateUser(username, user -> user.setFailedAttempts(0));
     }
 
     @Transactional
     public void lockAccount(String username, LocalDateTime lockUntil) {
-        User user = findByUserName(username);
-        if (user != null) {
+        updateUser(username, user -> {
             user.setAccountLockedUntil(lockUntil);
             user.setFailedAttempts(0);
-            userRepository.save(user);
-        }
+        });
+    }
+
+    private void updateUser(String username, Consumer<User> updater) {
+        User user = findByUserName(username);
+        updater.accept(user);
+        userRepository.save(user);
     }
 
 }
