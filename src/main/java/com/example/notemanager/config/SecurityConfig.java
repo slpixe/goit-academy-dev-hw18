@@ -21,10 +21,8 @@ public class SecurityConfig {
     @Bean(name = "userDetails")
     public UserDetailsService userDetailsService(UserService userService) {
         return username -> {
-            User user = userService.findByUserName(username);
-            if (user == null) {
-                throw new EntityException(ExceptionMessages.USER_NOT_FOUND.getMessage());
-            }
+            User user = userService.findByUserName(username)
+                    .orElseThrow(() -> new EntityException(ExceptionMessages.USER_NOT_FOUND.getMessage()));
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getUserName())
                     .password(user.getPassword())

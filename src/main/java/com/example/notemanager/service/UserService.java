@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 @Service
@@ -48,9 +49,14 @@ public class UserService {
         return "User created";
     }
 
-    public User findByUserName(String userName) {
-        return userRepository.findByUserName(userName)
-                .orElseThrow(() -> new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage()));
+    public Optional<User> findByUserName(String userName) {
+        try {
+            return Optional.ofNullable(userRepository.findByUserName(userName).orElseThrow(() ->
+                    new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage())));
+        } catch (EntityException ex) {
+            log.error("User not found: {}", userName);
+            return Optional.empty();
+        }
     }
 
     @Transactional
@@ -72,9 +78,16 @@ public class UserService {
     }
 
     private void updateUser(String username, Consumer<User> updater) {
-        User user = findByUserName(username);
-        updater.accept(user);
-        userRepository.save(user);
+        Optional<User> userOpt = findByUserName(username);
+
+        userOpt.ifPresentOrElse(user -> {
+            updater.accept(user);
+            userRepository.save(user);
+        }, () -> {
+            log.error("User not found: {}", username);
+            throw new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage());
+        });
     }
+
 
 }

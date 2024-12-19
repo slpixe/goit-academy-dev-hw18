@@ -1,5 +1,6 @@
 package com.example.notemanager.mvc.controller;
 
+import com.example.notemanager.exception.EntityException;
 import com.example.notemanager.model.User;
 import com.example.notemanager.service.LoginAttemptService;
 import com.example.notemanager.service.UserService;
@@ -50,7 +51,8 @@ public class AuthMvcController {
                 return "redirect:/login?error=LockedOut";
             }
 
-            User user = userService.findByUserName(username);
+            User user = userService.findByUserName(username)
+                    .orElseThrow(() -> new EntityException("User not found"));
             if (!passwordEncoder.matches(password, user.getPassword())) {
                 log.warn("Invalid credentials for user {}", username);
                 loginAttemptService.recordFailedAttempt(username);
@@ -62,6 +64,9 @@ public class AuthMvcController {
             log.info("User {} authenticated successfully", username);
 
             return "redirect:/note/list";
+        } catch (EntityException ex) {
+            log.error("Error during login: User {} not found", username);
+            return "redirect:/login?error=UserNotFound";
         } catch (Exception e) {
             log.error("Error during login: {}", e.getMessage(), e);
             return "redirect:/login?error=UnexpectedError";

@@ -1,14 +1,12 @@
 package com.example.notemanager.service;
 
-import com.example.notemanager.exception.EntityException;
-import com.example.notemanager.exception.ExceptionMessages;
-import com.example.notemanager.exception.NoteServiceException;
 import com.example.notemanager.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class LoginAttemptService {
@@ -28,10 +26,15 @@ public class LoginAttemptService {
             log.info("Recording failed login attempt for user {}", username);
             userService.incrementFailedAttempts(username);
 
-            User user = userService.findByUserName(username);
-            if (user.getFailedAttempts() >= MAX_FAILED_ATTEMPTS) {
-                log.warn("User {} exceeded max failed attempts, locking account", username);
-                userService.lockAccount(username, LocalDateTime.now().plusMinutes(LOCK_DURATION_MINUTES));
+            Optional<User> userOpt = userService.findByUserName(username);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                if (user.getFailedAttempts() >= MAX_FAILED_ATTEMPTS) {
+                    log.warn("User {} exceeded max failed attempts, locking account", username);
+                    userService.lockAccount(username, LocalDateTime.now().plusMinutes(LOCK_DURATION_MINUTES));
+                }
+            } else {
+                log.warn("User {} not found during failed attempt record", username);
             }
         } catch (Exception e) {
             log.error("Error recording failed login attempt for user {}: {}", username, e.getMessage(), e);
@@ -48,18 +51,18 @@ public class LoginAttemptService {
     }
 
     public boolean isAccountLocked(String username) {
-        try {
-            log.info("Checking if user {} is locked", username);
-            User user = userService.findByUserName(username);
-            boolean isLocked = user.getAccountLockedUntil() != null &&
-                    user.getAccountLockedUntil().isAfter(LocalDateTime.now());
-            if (isLocked) {
-                log.warn("User {} is locked until {}", username, user.getAccountLockedUntil());
-            }
-            return isLocked;
-        } catch (EntityException e) {
-            log.error("Error checking account lock status for user {}: {}", username, e.getMessage(), e);
-            throw new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage());
+        Optional<User> userOpt = userService.findByUserName(username);
+        if (userOpt.isEmpty()) {
+            log.warn("User {} not found", username);
+            return false;
         }
+
+        User user = userOpt.get();
+        boolean isLocked = user.getAccountLockedUntil() != null &&
+                user.getAccountLockedUntil().isAfter(LocalDateTime.now());
+        if (isLocked) {
+            log.warn("User {} is locked until {}", username, user.getAccountLockedUntil());
+        }
+        return isLocked;
     }
 }
