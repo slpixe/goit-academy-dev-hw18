@@ -1,6 +1,7 @@
 package com.example.notemanager.mvc.controller;
 
 import com.example.notemanager.model.User;
+import com.example.notemanager.mvc.security.LoginAttemptService;
 import com.example.notemanager.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -16,23 +17,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.time.LocalDateTime;
-
 @Controller
 public class AuthMvcController {
     private static final Logger log = LoggerFactory.getLogger(AuthMvcController.class);
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final LoginAttemptService loginAttemptService;
 
     public AuthMvcController(UserService userService,
-                       @Qualifier("passEncoder") PasswordEncoder passwordEncoder) {
+                             @Qualifier("passEncoder") PasswordEncoder passwordEncoder,
+                             LoginAttemptService loginAttemptService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.loginAttemptService = loginAttemptService;
     }
-
-    private static final int MAX_FAILED_LOGIN_ATTEMPTS = 2;
-    private static final int ACCOUNT_LOCK_DURATION_MINUTES = 15;
 
     @GetMapping("/login")
     public String loginPage() {
@@ -40,50 +39,26 @@ public class AuthMvcController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam("username") String username, @RequestParam("password") String password, HttpServletRequest request) {
+    public String login(@RequestParam("username") String username,
+                        @RequestParam("password") String password,
+                        HttpServletRequest request) {
         try {
             log.info("Attempting to authenticate user {}", username);
 
-            User user = userService.findByUserName(username);
-            if (user == null) {
-                log.warn("User {} not found", username);
-                return "redirect:/login?error=UserNotFound";
-            }
-
-            if (user.getAccountLockedUntil() != null && user.getAccountLockedUntil().isAfter(LocalDateTime.now())) {
-                log.warn("User {} is locked out until {}", username, user.getAccountLockedUntil());
+            if (loginAttemptService.isAccountLocked(username)) {
+                log.warn("User {} is locked out", username);
                 return "redirect:/login?error=LockedOut";
             }
 
+            User user = userService.findByUserName(username);
             if (!passwordEncoder.matches(password, user.getPassword())) {
                 log.warn("Invalid credentials for user {}", username);
-                userService.incrementFailedAttempts(username);
-                if (user.getFailedAttempts() >= MAX_FAILED_LOGIN_ATTEMPTS) {
-                    userService.lockAccount(username, LocalDateTime.now().plusMinutes(ACCOUNT_LOCK_DURATION_MINUTES));
-                    log.warn("User {} account locked due to too many failed attempts", username);
-                    return "redirect:/login?error=LockedOut";
-                }
+                loginAttemptService.recordFailedAttempt(username);
                 return "redirect:/login?error=InvalidCredentials";
             }
 
-            userService.resetFailedAttempts(username);
-
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    username,
-                    null,
-                    org.springframework.security.core.userdetails.User
-                            .withUsername(user.getUserName())
-                            .password(user.getPassword())
-                            .authorities(user.getRole())
-                            .build()
-                            .getAuthorities()
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            HttpSession session = request.getSession(true);
-            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-
+            loginAttemptService.resetFailedAttempts(username);
+            authenticateUser(user, request);
             log.info("User {} authenticated successfully", username);
 
             return "redirect:/note/list";
@@ -99,7 +74,8 @@ public class AuthMvcController {
     }
 
     @PostMapping("/signup")
-    public String signup(@RequestParam("username") String username, @RequestParam("password") String password) {
+    public String signup(@RequestParam("username") String username,
+                         @RequestParam("password") String password) {
         try {
             userService.createUser(username, password);
         } catch (Exception e) {
@@ -107,5 +83,23 @@ public class AuthMvcController {
         }
         log.info("User {} created", username);
         return "redirect:/login";
+    }
+
+    private void authenticateUser(User user, HttpServletRequest request) {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                user.getUserName(),
+                null,
+                org.springframework.security.core.userdetails.User
+                        .withUsername(user.getUserName())
+                        .password(user.getPassword())
+                        .authorities(user.getRole())
+                        .build()
+                        .getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        HttpSession session = request.getSession(true);
+        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
     }
 }
