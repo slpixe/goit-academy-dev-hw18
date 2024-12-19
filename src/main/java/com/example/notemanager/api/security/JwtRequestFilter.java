@@ -23,7 +23,7 @@ import java.io.IOException;
 public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     @Lazy
-    @Qualifier("apiUserDetails")
+    @Qualifier("userDetails")
     private UserDetailsService userDetailsService;
     @Autowired
     @Lazy

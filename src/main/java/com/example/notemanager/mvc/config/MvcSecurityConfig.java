@@ -1,9 +1,5 @@
 package com.example.notemanager.mvc.config;
 
-import com.example.notemanager.exception.EntityException;
-import com.example.notemanager.exception.ExceptionMessages;
-import com.example.notemanager.model.User;
-import com.example.notemanager.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +18,7 @@ public class MvcSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
-                                                   @Qualifier("mvcUserDetails") UserDetailsService userDetailsService) throws Exception {
+                                                   @Qualifier("userDetails") UserDetailsService userDetailsService) throws Exception {
         return httpSecurity
                 .securityMatcher("/**")
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
@@ -49,21 +45,5 @@ public class MvcSecurityConfig {
                                 .deleteCookies("JSESSIONID")
                 )
                 .build();
-    }
-
-    @Bean(name = "mvcUserDetails")
-    public UserDetailsService userDetailsService(UserService userService) {
-        return username -> {
-            User user = userService.findByUserName(username);
-            if (user == null) {
-                throw new EntityException(ExceptionMessages.USER_NOT_FOUND.getMessage());
-            }
-            log.info("Loaded user: {}", user.getUserName());
-            return org.springframework.security.core.userdetails.User
-                    .withUsername(user.getUserName())
-                    .password(user.getPassword())
-                    .authorities(user.getRole())
-                    .build();
-        };
     }
 }

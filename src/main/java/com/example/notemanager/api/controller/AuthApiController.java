@@ -31,7 +31,7 @@ public class AuthApiController {
 
     public AuthApiController(UserService userService,
                              DaoAuthenticationProvider authenticationManager,
-                             @Qualifier("apiUserDetails") UserDetailsService userDetailsService,
+                             @Qualifier("userDetails") UserDetailsService userDetailsService,
                              JwtUtil jwtUtil) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;

@@ -1,8 +1,6 @@
 package com.example.notemanager.api.config;
 
-import com.example.notemanager.model.User;
 import com.example.notemanager.api.security.JwtRequestFilter;
-import com.example.notemanager.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,23 +44,10 @@ public class ApiSecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(@Qualifier("apiUserDetails") UserDetailsService userDetailsService, @Qualifier("passEncoder") PasswordEncoder passwordEncoder) {
+    public DaoAuthenticationProvider authenticationProvider(@Qualifier("userDetails") UserDetailsService userDetailsService, @Qualifier("passEncoder") PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
-    }
-
-    @Bean(name = "apiUserDetails")
-    public UserDetailsService userDetailsService(UserService userService) {
-        return username -> {
-            log.info("Loading user: {}", username);
-            User user = userService.findByUserName(username);
-            return org.springframework.security.core.userdetails.User
-                    .withUsername(user.getUserName())
-                    .password(user.getPassword())
-                    .authorities(user.getRole())
-                    .build();
-        };
     }
 }
