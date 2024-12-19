@@ -3,7 +3,7 @@ package com.example.notemanager.service;
 import com.example.notemanager.exception.EntityException;
 import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.model.User;
-import com.example.notemanager.model.dto.request.UserCreateRequest;
+import com.example.notemanager.api.model.dto.request.UserCreateRequest;
 import com.example.notemanager.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;

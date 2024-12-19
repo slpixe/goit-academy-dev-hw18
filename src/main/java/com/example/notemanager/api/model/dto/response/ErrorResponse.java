@@ -1,4 +1,4 @@
-package com.example.notemanager.model.dto.response;
+package com.example.notemanager.api.model.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

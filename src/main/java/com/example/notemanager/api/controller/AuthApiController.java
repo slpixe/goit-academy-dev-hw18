@@ -1,7 +1,7 @@
 package com.example.notemanager.api.controller;
 
-import com.example.notemanager.model.dto.request.UserCreateRequest;
-import com.example.notemanager.model.dto.request.UserLoginRequest;
+import com.example.notemanager.api.model.dto.request.UserCreateRequest;
+import com.example.notemanager.api.model.dto.request.UserLoginRequest;
 import com.example.notemanager.service.UserService;
 import com.example.notemanager.api.util.JwtUtil;
 

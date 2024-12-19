@@ -1,4 +1,4 @@
-package com.example.notemanager.model.dto.request;
+package com.example.notemanager.api.model.dto.request;
 
 import lombok.Builder;
 

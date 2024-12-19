@@ -1,7 +1,7 @@
 package com.example.notemanager.api.exception;
 
 import com.example.notemanager.exception.NoteServiceException;
-import com.example.notemanager.model.dto.response.ErrorResponse;
+import com.example.notemanager.api.model.dto.response.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
