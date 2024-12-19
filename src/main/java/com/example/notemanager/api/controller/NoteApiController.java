@@ -1,6 +1,7 @@
 package com.example.notemanager.api.controller;
 
 import com.example.notemanager.model.Note;
+import com.example.notemanager.model.dto.NoteMapper;
 import com.example.notemanager.model.dto.response.NoteResponse;
 import com.example.notemanager.service.NoteService;
 import jakarta.validation.Valid;
@@ -26,21 +27,20 @@ import org.springframework.web.bind.annotation.RestController;
 public class NoteApiController {
 
     private final NoteService noteService;
+    private final NoteMapper noteMapper;
 
     @GetMapping()
     public Page<NoteResponse> listAll(@RequestParam(defaultValue = "0") int page,
                                       @RequestParam(defaultValue = "10") int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        return noteService.listAll(pageRequest);
+        return noteService.listAll(pageRequest)
+                .map(noteMapper::toResponse);
     }
 
     @GetMapping("/{id}")
     public NoteResponse getById(@PathVariable @Positive Long id) {
         Note note = noteService.getById(id);
-        return NoteResponse.builder()
-                .title(note.getTitle())
-                .content(note.getContent())
-                .build();
+        return noteMapper.toResponse(note);
     }
 
     @DeleteMapping("/{id}")
@@ -53,13 +53,26 @@ public class NoteApiController {
     public NoteResponse edit(@PathVariable @Positive Long id,
                                      @Valid @RequestBody Note note) {
         note.setId(id);
-        return noteService.update(note);
+        Note updatedNote = noteService.update(note);
+        return noteMapper.toResponse(updatedNote);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public NoteResponse create(@Valid @RequestBody Note note) {
-        return noteService.create(note);
+        Note savedNote = noteService.create(note);
+        return noteMapper.toResponse(savedNote);
     }
 
+    @GetMapping("/search")
+    public Page<NoteResponse> searchNotes(@RequestParam String keyword,
+                                          @RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "10") int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return noteService.search(keyword, pageRequest)
+                .map(note -> NoteResponse.builder()
+                        .title(note.getTitle())
+                        .content(note.getContent())
+                        .build());
+    }
 }
