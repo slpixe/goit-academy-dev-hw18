@@ -23,12 +23,12 @@ public class AuthMvcController {
     private static final Logger log = LoggerFactory.getLogger(AuthMvcController.class);
 
     private final UserService userService;
-    private final PasswordEncoder mvcPasswordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthMvcController(UserService userService,
-                       @Qualifier("mvcPassEncoder") PasswordEncoder mvcPasswordEncoder) {
+                       @Qualifier("passEncoder") PasswordEncoder passwordEncoder) {
         this.userService = userService;
-        this.mvcPasswordEncoder = mvcPasswordEncoder;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private static final int MAX_FAILED_LOGIN_ATTEMPTS = 2;
@@ -55,7 +55,7 @@ public class AuthMvcController {
                 return "redirect:/login?error=LockedOut";
             }
 
-            if (!mvcPasswordEncoder.matches(password, user.getPassword())) {
+            if (!passwordEncoder.matches(password, user.getPassword())) {
                 log.warn("Invalid credentials for user {}", username);
                 userService.incrementFailedAttempts(username);
                 if (user.getFailedAttempts() >= MAX_FAILED_LOGIN_ATTEMPTS) {

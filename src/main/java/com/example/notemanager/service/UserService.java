@@ -3,7 +3,6 @@ package com.example.notemanager.service;
 import com.example.notemanager.exception.EntityException;
 import com.example.notemanager.exception.ExceptionMessages;
 import com.example.notemanager.model.User;
-import com.example.notemanager.api.model.dto.request.UserCreateRequest;
 import com.example.notemanager.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -20,15 +19,12 @@ public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
-    private final PasswordEncoder apiPasswordEncoder;
-    private final PasswordEncoder mvcPasswordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
-                       @Qualifier("apiPassEncoder") PasswordEncoder apiPasswordEncoder,
-                       @Qualifier("mvcPassEncoder") PasswordEncoder mvcPasswordEncoder) {
+                       @Qualifier("passEncoder") PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.apiPasswordEncoder = apiPasswordEncoder;
-        this.mvcPasswordEncoder = mvcPasswordEncoder;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User getAuthenticatedUser() {
@@ -44,23 +40,7 @@ public class UserService {
 
         User user = User.builder()
                 .userName(username)
-                .password(mvcPasswordEncoder.encode(password))
-                .role("ROLE_USER")
-                .build();
-        userRepository.save(user);
-        return "User created";
-    }
-
-    @Transactional
-    public String createUser(UserCreateRequest request) {
-        if (userRepository.existsByUserName(request.userName())) {
-            return "User already exists";
-        }
-
-        log.info("Creating user {}", request.userName());
-        User user = User.builder()
-                .userName(request.userName())
-                .password(apiPasswordEncoder.encode(request.password()))
+                .password(passwordEncoder.encode(password))
                 .role("ROLE_USER")
                 .build();
         userRepository.save(user);

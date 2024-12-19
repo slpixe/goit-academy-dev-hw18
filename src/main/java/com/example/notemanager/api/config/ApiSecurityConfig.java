@@ -16,7 +16,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -47,16 +46,11 @@ public class ApiSecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(@Qualifier("apiUserDetails") UserDetailsService userDetailsService, @Qualifier("apiPassEncoder") PasswordEncoder passwordEncoder) {
+    public DaoAuthenticationProvider authenticationProvider(@Qualifier("apiUserDetails") UserDetailsService userDetailsService, @Qualifier("passEncoder") PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
-    }
-
-    @Bean(name = "apiPassEncoder")
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean(name = "apiUserDetails")

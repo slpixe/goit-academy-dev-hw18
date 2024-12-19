@@ -42,7 +42,7 @@ public class AuthApiController {
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public String signup(@RequestBody UserCreateRequest request) {
-        return userService.createUser(request);
+        return userService.createUser(request.userName(), request.password());
     }
 
     @PostMapping("/login")
