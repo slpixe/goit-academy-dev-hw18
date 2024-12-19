@@ -50,13 +50,8 @@ public class UserService {
     }
 
     public Optional<User> findByUserName(String userName) {
-        try {
-            return Optional.ofNullable(userRepository.findByUserName(userName).orElseThrow(() ->
-                    new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage())));
-        } catch (EntityException ex) {
-            log.error("User not found: {}", userName);
-            return Optional.empty();
-        }
+        return Optional.ofNullable(userRepository.findByUserName(userName).orElseThrow(() ->
+                new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage())));
     }
 
     @Transactional

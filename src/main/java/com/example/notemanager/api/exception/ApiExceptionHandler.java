@@ -1,8 +1,8 @@
 package com.example.notemanager.api.exception;
 
 import com.example.notemanager.exception.EntityException;
-import com.example.notemanager.exception.NoteServiceException;
 import com.example.notemanager.api.model.dto.response.ErrorResponse;
+import com.example.notemanager.exception.NoteServiceException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,8 +14,14 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice(basePackages = "com.example.notemanager.api")
 public class ApiExceptionHandler {
-    @ExceptionHandler({NoteServiceException.class, EntityException.class})
-    public ResponseEntity<ErrorResponse> handleNoteServiceException(Exception e) {
+    @ExceptionHandler(EntityException.class)
+    public ResponseEntity<ErrorResponse> handleEntityException(EntityException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(NoteServiceException.class)
+    public ResponseEntity<ErrorResponse> handleNoteException(NoteServiceException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage()));
     }
