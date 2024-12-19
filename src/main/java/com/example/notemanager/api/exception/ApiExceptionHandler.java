@@ -1,5 +1,6 @@
 package com.example.notemanager.api.exception;
 
+import com.example.notemanager.exception.EntityException;
 import com.example.notemanager.exception.NoteServiceException;
 import com.example.notemanager.api.model.dto.response.ErrorResponse;
 import jakarta.validation.ConstraintViolationException;
@@ -9,11 +10,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice(basePackages = "com.example.notemanager.api")
 public class ApiExceptionHandler {
-    @ExceptionHandler(NoteServiceException.class)
-    public ResponseEntity<ErrorResponse> handleNoteServiceException(NoteServiceException e) {
+    @ExceptionHandler({NoteServiceException.class, EntityException.class})
+    public ResponseEntity<ErrorResponse> handleNoteServiceException(Exception e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(HttpStatus.NOT_FOUND.value(), e.getMessage()));
     }
@@ -41,6 +43,12 @@ public class ApiExceptionHandler {
         String errorMessage = "Invalid request data. Please check your input.";
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errorMessage));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode())
+                .body(new ErrorResponse(e.getStatusCode().value(), e.getReason()));
     }
 
     @ExceptionHandler(Exception.class)

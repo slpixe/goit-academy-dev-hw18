@@ -1,5 +1,8 @@
 package com.example.notemanager.service;
 
+import com.example.notemanager.exception.EntityException;
+import com.example.notemanager.exception.ExceptionMessages;
+import com.example.notemanager.exception.NoteServiceException;
 import com.example.notemanager.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +57,9 @@ public class LoginAttemptService {
                 log.warn("User {} is locked until {}", username, user.getAccountLockedUntil());
             }
             return isLocked;
-        } catch (Exception e) {
+        } catch (EntityException e) {
             log.error("Error checking account lock status for user {}: {}", username, e.getMessage(), e);
-            return false;
+            throw new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage());
         }
     }
 }
