@@ -1,7 +1,9 @@
 package com.example.notemanager.api.controller;
 
+import com.example.notemanager.api.model.dto.SignupResultMapper;
 import com.example.notemanager.api.model.dto.request.UserCreateRequest;
 import com.example.notemanager.api.model.dto.request.UserLoginRequest;
+import com.example.notemanager.api.model.dto.response.SignupResponse;
 import com.example.notemanager.service.LoginAttemptService;
 import com.example.notemanager.service.UserService;
 import com.example.notemanager.api.util.JwtUtil;
@@ -18,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,23 +33,30 @@ public class AuthApiController {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
     private final LoginAttemptService loginAttemptService;
+    private final SignupResultMapper signupResultMapper;
 
     public AuthApiController(UserService userService,
                              DaoAuthenticationProvider authenticationManager,
                              @Qualifier("userDetails") UserDetailsService userDetailsService,
                              JwtUtil jwtUtil,
-                             LoginAttemptService loginAttemptService) {
+                             LoginAttemptService loginAttemptService,
+                             SignupResultMapper signupResultMapper) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.jwtUtil = jwtUtil;
         this.loginAttemptService = loginAttemptService;
+        this.signupResultMapper = signupResultMapper;
     }
 
     @PostMapping("/signup")
-    @ResponseStatus(HttpStatus.CREATED)
-    public String signup(@RequestBody UserCreateRequest request) {
-        return userService.createUser(request.userName(), request.password());
+    public SignupResponse signup(@RequestBody UserCreateRequest request) {
+        try {
+            String message = userService.createUser(request.userName(), request.password());
+            return signupResultMapper.toResponse(request.userName(), message);
+        } catch (Exception e) {
+            return signupResultMapper.toResponse(null, "Failed to create user: " + e.getMessage());
+        }
     }
 
     @PostMapping("/login")
