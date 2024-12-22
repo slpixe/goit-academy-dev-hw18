@@ -11,9 +11,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface NoteRepository extends JpaRepository<Note, Long> {
+    @Query("SELECT n FROM Note n JOIN FETCH n.user WHERE n.user = :user")
     Page<Note> findByUser(User user, Pageable pageable);
 
-    Optional<Note> findByIdAndUser(Long id, User user);
+    @Query("SELECT n FROM Note n JOIN FETCH n.user WHERE n.id = :id AND n.user = :user")
+    Optional<Note> findByIdAndUser(@Param("id") Long id, @Param("user") User user);
 
     @Query("SELECT n FROM Note n WHERE n.user = :user AND " +
             "(LOWER(n.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
