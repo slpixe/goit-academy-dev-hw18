@@ -3,6 +3,7 @@ package com.example.notemanager.api.controller;
 import com.example.notemanager.api.model.dto.SignupResultMapper;
 import com.example.notemanager.api.model.dto.request.UserCreateRequest;
 import com.example.notemanager.api.model.dto.request.UserLoginRequest;
+import com.example.notemanager.api.model.dto.response.LoginResponse;
 import com.example.notemanager.api.model.dto.response.SignupResponse;
 import com.example.notemanager.service.LoginAttemptService;
 import com.example.notemanager.service.UserService;
@@ -60,7 +61,7 @@ public class AuthApiController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody UserLoginRequest request) {
+    public LoginResponse login(@RequestBody UserLoginRequest request) {
         log.info("Login request for user: {}", request.userName());
 
         // Step 1: Check if account is locked
@@ -93,8 +94,9 @@ public class AuthApiController {
 
         // Step 5: Generate JWT Token
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.userName());
+        LoginResponse response = new LoginResponse(jwtUtil.generateToken(userDetails));
         log.info("Authentication successful for user: {}", request.userName());
-        return jwtUtil.generateToken(userDetails);
+        return response;
     }
 
 }
