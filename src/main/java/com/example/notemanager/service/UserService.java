@@ -14,11 +14,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 @Service
 public class UserService {
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
+    private static final int MAX_FAILED_ATTEMPTS = 3;
+    private static final int LOCK_DURATION_MINUTES = 15;
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -54,35 +55,31 @@ public class UserService {
                 new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage())));
     }
 
-    @Transactional
-    public void incrementFailedAttempts(String username) {
-        updateUser(username, user -> user.setFailedAttempts(user.getFailedAttempts() + 1));
+    public boolean isAccountLocked(User user) {
+        boolean isLocked = user.getAccountLockedUntil() != null &&
+                user.getAccountLockedUntil().isAfter(LocalDateTime.now());
+        if (isLocked) {
+            log.warn("User {} is locked until {}", user.getUsername(), user.getAccountLockedUntil());
+        }
+        return isLocked;
     }
 
     @Transactional
-    public void resetFailedAttempts(String username) {
-        updateUser(username, user -> user.setFailedAttempts(0));
+    public void recordFailedAttempt(User user) {
+        user.setFailedAttempts(user.getFailedAttempts() + 1);
+
+        if (user.getFailedAttempts() >= MAX_FAILED_ATTEMPTS) {
+            log.warn("User {} exceeded max failed attempts, locking account", user.getUsername());
+            user.setAccountLockedUntil(LocalDateTime.now().plusMinutes(LOCK_DURATION_MINUTES));
+        }
+
+        userRepository.save(user);
     }
 
     @Transactional
-    public void lockAccount(String username, LocalDateTime lockUntil) {
-        updateUser(username, user -> {
-            user.setAccountLockedUntil(lockUntil);
-            user.setFailedAttempts(0);
-        });
+    public void resetFailedAttempts(User user) {
+        user.setFailedAttempts(0);
+        user.setAccountLockedUntil(null);
+        userRepository.save(user);
     }
-
-    private void updateUser(String username, Consumer<User> updater) {
-        Optional<User> userOpt = findByUserName(username);
-
-        userOpt.ifPresentOrElse(user -> {
-            updater.accept(user);
-            userRepository.save(user);
-        }, () -> {
-            log.error("User not found: {}", username);
-            throw new EntityException(ExceptionMessages.ENTITY_NOT_FOUND.getMessage());
-        });
-    }
-
-
 }

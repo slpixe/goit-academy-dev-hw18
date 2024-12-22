@@ -2,7 +2,6 @@ package com.example.notemanager.mvc.controller;
 
 import com.example.notemanager.exception.EntityException;
 import com.example.notemanager.model.User;
-import com.example.notemanager.service.LoginAttemptService;
 import com.example.notemanager.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -24,14 +23,11 @@ public class AuthMvcController {
 
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final LoginAttemptService loginAttemptService;
 
     public AuthMvcController(UserService userService,
-                             @Qualifier("passEncoder") PasswordEncoder passwordEncoder,
-                             LoginAttemptService loginAttemptService) {
+                             @Qualifier("passEncoder") PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
-        this.loginAttemptService = loginAttemptService;
     }
 
     @GetMapping("/login")
@@ -46,20 +42,21 @@ public class AuthMvcController {
         try {
             log.info("Attempting to authenticate user {}", username);
 
-            if (loginAttemptService.isAccountLocked(username)) {
+            User user = userService.findByUserName(username)
+                    .orElseThrow(() -> new EntityException("User not found"));
+
+            if (userService.isAccountLocked(user)) {
                 log.warn("User {} is locked out", username);
                 return "redirect:/login?error=LockedOut";
             }
 
-            User user = userService.findByUserName(username)
-                    .orElseThrow(() -> new EntityException("User not found"));
             if (!passwordEncoder.matches(password, user.getPassword())) {
                 log.warn("Invalid credentials for user {}", username);
-                loginAttemptService.recordFailedAttempt(username);
+                userService.recordFailedAttempt(user);
                 return "redirect:/login?error=InvalidCredentials";
             }
 
-            loginAttemptService.resetFailedAttempts(username);
+            userService.resetFailedAttempts(user);
             authenticateUser(user, request);
             log.info("User {} authenticated successfully", username);
 
@@ -92,10 +89,10 @@ public class AuthMvcController {
 
     private void authenticateUser(User user, HttpServletRequest request) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user.getUserName(),
+                user.getUsername(),
                 null,
                 org.springframework.security.core.userdetails.User
-                        .withUsername(user.getUserName())
+                        .withUsername(user.getUsername())
                         .password(user.getPassword())
                         .authorities(user.getRole())
                         .build()

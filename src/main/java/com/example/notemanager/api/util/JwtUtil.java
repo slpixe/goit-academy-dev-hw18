@@ -63,6 +63,9 @@ public class JwtUtil {
     }
 
     private SecretKey getSigningKey() {
+        if (secret == null || secret.isEmpty()) {
+            throw new IllegalStateException("JWT secret key is not configured");
+        }
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 }

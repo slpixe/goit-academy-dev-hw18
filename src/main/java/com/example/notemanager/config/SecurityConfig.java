@@ -24,7 +24,7 @@ public class SecurityConfig {
             User user = userService.findByUserName(username)
                     .orElseThrow(() -> new EntityException(ExceptionMessages.USER_NOT_FOUND.getMessage()));
             return org.springframework.security.core.userdetails.User
-                    .withUsername(user.getUserName())
+                    .withUsername(user.getUsername())
                     .password(user.getPassword())
                     .authorities(user.getRole())
                     .build();

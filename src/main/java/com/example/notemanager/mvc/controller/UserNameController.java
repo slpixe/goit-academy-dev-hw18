@@ -17,7 +17,7 @@ public class UserNameController {
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
                 SecurityContextHolder.getContext().getAuthentication().isAuthenticated() &&
                 !"anonymousUser".equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())) {
-            return userService.getAuthenticatedUser().getUserName();
+            return userService.getAuthenticatedUser().getUsername();
         }
         return DEFAULT_USER_NAME;
     }
