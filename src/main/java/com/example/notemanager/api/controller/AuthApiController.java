@@ -77,7 +77,7 @@ public class AuthApiController {
             );
         } catch (BadCredentialsException ex) {
             log.warn("Invalid credentials for user: {}", user.getUsername());
-            userService.recordFailedAttempt(user);
+            userService.recordFailedAttempt(user.getId());
 
             if (userService.isAccountLocked(user)) {
                 log.warn("Account locked for user: {}", user.getUsername());

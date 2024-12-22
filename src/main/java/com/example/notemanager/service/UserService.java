@@ -68,21 +68,13 @@ public class UserService {
     }
 
     @Transactional
-    public void recordFailedAttempt(User user) {
-        user.setFailedAttempts(user.getFailedAttempts() + 1);
-
-        if (user.getFailedAttempts() >= MAX_FAILED_ATTEMPTS) {
-            log.warn("User {} exceeded max failed attempts, locking account", user.getUsername());
-            user.setAccountLockedUntil(LocalDateTime.now().plusMinutes(LOCK_DURATION_MINUTES));
-        }
-
-        userRepository.save(user);
+    public void recordFailedAttempt(Long userId) {
+        LocalDateTime lockTime = LocalDateTime.now().plusMinutes(LOCK_DURATION_MINUTES);
+        userRepository.incrementFailedAttempts(userId, MAX_FAILED_ATTEMPTS, lockTime);
     }
 
     @Transactional
-    @Modifying
-    @Query("UPDATE User u SET u.failedAttempts = 0, u.accountLockedUntil = NULL WHERE u.id = :userId")
-    public void resetFailedAttempts(@Param("userId") Long userId) {
-        // The method body is empty because the query handles the update
+    public void resetFailedAttempts(Long userId) {
+        userRepository.resetFailedAttempts(userId);
     }
 }

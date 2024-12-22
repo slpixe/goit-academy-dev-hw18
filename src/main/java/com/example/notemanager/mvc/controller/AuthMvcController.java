@@ -52,7 +52,7 @@ public class AuthMvcController {
 
             if (!passwordEncoder.matches(password, user.getPassword())) {
                 log.warn("Invalid credentials for user {}", username);
-                userService.recordFailedAttempt(user);
+                userService.recordFailedAttempt(user.getId());
                 return "redirect:/login?error=InvalidCredentials";
             }
 
