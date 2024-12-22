@@ -1,5 +1,5 @@
-INSERT INTO users (id, username, password, role) VALUES
-    (1, 'Bob','$2a$10$CORo/QAt5ggGF/i1acONWuvuyFrWbmr.vXnpttruVAmxLl5YalEUa', 'ROLE_USER');
+INSERT INTO users (username, password, role) VALUES
+    ('Bob','$2a$10$CORo/QAt5ggGF/i1acONWuvuyFrWbmr.vXnpttruVAmxLl5YalEUa', 'ROLE_USER');
 
 INSERT INTO notes (title, content, user_id) VALUES
     ('Morning Stretch', 'Started the day with a big stretch and a loud yawn. Feeling refreshed!', 1),
