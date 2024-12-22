@@ -87,8 +87,10 @@ public class AuthApiController {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        // Step 3: Reset failed attempts
-        userService.resetFailedAttempts(user.getId());
+        // Step 3: Reset failed attempts only if conditions are met
+        if (user.getFailedAttempts() > 0 && user.getFailedAttempts() <= 2) {
+            userService.resetFailedAttempts(user.getId());
+        }
 
         // Step 4: Generate JWT Token
         LoginResponse response = new LoginResponse(jwtUtil.generateToken(user));
