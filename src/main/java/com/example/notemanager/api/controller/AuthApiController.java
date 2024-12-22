@@ -9,7 +9,6 @@ import com.example.notemanager.model.User;
 import com.example.notemanager.service.UserService;
 import com.example.notemanager.api.util.JwtUtil;
 
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -58,7 +57,6 @@ public class AuthApiController {
     }
 
     @PostMapping("/login")
-    @Transactional
     public LoginResponse login(@RequestBody UserLoginRequest request) {
         log.info("Login request for user: {}", request.userName());
 
