@@ -42,7 +42,7 @@ public class Note {
     @NotNull(message = "Content must not be null")
     @NotEmpty(message = "Content must not be empty")
     private String content;
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }
