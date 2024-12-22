@@ -88,7 +88,7 @@ public class AuthApiController {
         }
 
         // Step 3: Reset failed attempts
-        userService.resetFailedAttempts(user);
+        userService.resetFailedAttempts(user.getId());
 
         // Step 4: Generate JWT Token
         LoginResponse response = new LoginResponse(jwtUtil.generateToken(user));

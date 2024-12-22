@@ -8,6 +8,9 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -77,9 +80,9 @@ public class UserService {
     }
 
     @Transactional
-    public void resetFailedAttempts(User user) {
-        user.setFailedAttempts(0);
-        user.setAccountLockedUntil(null);
-        userRepository.save(user);
+    @Modifying
+    @Query("UPDATE User u SET u.failedAttempts = 0, u.accountLockedUntil = NULL WHERE u.id = :userId")
+    public void resetFailedAttempts(@Param("userId") Long userId) {
+        // The method body is empty because the query handles the update
     }
 }
