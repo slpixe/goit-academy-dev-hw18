@@ -44,12 +44,13 @@ public class User implements UserDetails {
     private LocalDateTime accountLockedUntil;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Note> notes;
 
     // UserDetails methods implementation
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Map the `role` field to a GrantedAuthority
         return List.of(new SimpleGrantedAuthority(role));
     }
 

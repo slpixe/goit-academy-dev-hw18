@@ -1,5 +1,6 @@
 package com.example.notemanager.api.controller;
 
+import com.example.notemanager.CustomUserDetails;
 import com.example.notemanager.api.model.dto.SignupResultMapper;
 import com.example.notemanager.api.model.dto.request.UserCreateRequest;
 import com.example.notemanager.api.model.dto.request.UserLoginRequest;
@@ -16,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -60,42 +63,35 @@ public class AuthApiController {
     public LoginResponse login(@RequestBody UserLoginRequest request) {
         log.info("Login request for user: {}", request.userName());
 
-        // Fetch user once
-        User user = userService.findByUserName(request.userName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials"));
-
-        // Step 1: Check if account is locked
-        if (userService.isAccountLocked(user)) {
-            log.warn("Account is locked for user: {}", user.getUsername());
-            throw new ResponseStatusException(HttpStatus.LOCKED, "Account is locked. Try again later.");
-        }
-
-        // Step 2: Attempt authentication
         try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getUsername(), request.password())
-            );
-        } catch (BadCredentialsException ex) {
-            log.warn("Invalid credentials for user: {}", user.getUsername());
-            userService.recordFailedAttempt(user.getId());
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    request.userName(), request.password());
+            Authentication authResult = authenticationManager.authenticate(authToken);
 
+            // Get the authenticated user's details
+            CustomUserDetails customUserDetails = (CustomUserDetails) authResult.getPrincipal();
+            User user = customUserDetails.getUser();
+
+            // Check account status
             if (userService.isAccountLocked(user)) {
-                log.warn("Account locked for user: {}", user.getUsername());
                 throw new ResponseStatusException(HttpStatus.LOCKED, "Account is locked. Try again later.");
             }
 
+            // Set the authentication in the SecurityContext
+            SecurityContextHolder.getContext().setAuthentication(authResult);
+
+            // Reset failed attempts
+            userService.resetFailedAttempts(user);
+
+            // Generate JWT Token
+            String token = jwtUtil.generateToken(user);
+
+            log.info("Authentication successful for user: {}", user.getUsername());
+            return new LoginResponse(token);
+
+        } catch (BadCredentialsException ex) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
-
-        // Step 3: Reset failed attempts only if conditions are met
-        if (user.getFailedAttempts() > 0 && user.getFailedAttempts() <= 2) {
-            userService.resetFailedAttempts(user.getId());
-        }
-
-        // Step 4: Generate JWT Token
-        LoginResponse response = new LoginResponse(jwtUtil.generateToken(user));
-        log.info("Authentication successful for user: {}", user.getUsername());
-        return response;
     }
 
 }
