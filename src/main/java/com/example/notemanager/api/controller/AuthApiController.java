@@ -80,7 +80,7 @@ public class AuthApiController {
             // Set the authentication in the SecurityContext
             SecurityContextHolder.getContext().setAuthentication(authResult);
 
-            // Reset failed attempts
+            // Reset failed attempts using the existing User object
             userService.resetFailedAttempts(user);
 
             // Generate JWT Token
@@ -90,6 +90,14 @@ public class AuthApiController {
             return new LoginResponse(token);
 
         } catch (BadCredentialsException ex) {
+            log.warn("Invalid credentials for user: {}", request.userName());
+            // Record the failed attempt
+            userService.findByUserName(request.userName()).ifPresent(user -> {
+                userService.recordFailedAttempt(user.getId());
+                if (userService.isAccountLocked(user)) {
+                    log.warn("User {} is now locked due to too many failed attempts.", user.getUsername());
+                }
+            });
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
     }
