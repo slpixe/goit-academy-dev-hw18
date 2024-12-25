@@ -1,5 +1,6 @@
 package com.example.notemanager.api.controller;
 
+import com.example.notemanager.UserContext;
 import com.example.notemanager.model.Note;
 import com.example.notemanager.api.model.dto.NoteMapper;
 import com.example.notemanager.api.model.dto.response.NoteResponse;
@@ -7,6 +8,7 @@ import com.example.notemanager.service.NoteService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/notes")
 @RequiredArgsConstructor
 public class NoteApiController {
+
+//    @Autowired
+//    private UserContext userContext;
 
     private final NoteService noteService;
     private final NoteMapper noteMapper;

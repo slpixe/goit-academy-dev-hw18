@@ -1,5 +1,6 @@
 package com.example.notemanager.api.config;
 
+import com.example.notemanager.UserContextFilter;
 import com.example.notemanager.api.security.JwtRequestFilter;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class ApiSecurityConfig {
     private final JwtRequestFilter jwtRequestFilter;
 
     @Bean
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity, UserContextFilter userContextFilter) throws Exception {
         return httpSecurity
                 .securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -40,6 +41,7 @@ public class ApiSecurityConfig {
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
+                .addFilterAfter(userContextFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

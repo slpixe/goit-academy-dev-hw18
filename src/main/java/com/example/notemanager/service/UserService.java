@@ -38,8 +38,10 @@ public class UserService {
 
     public User getAuthenticatedUser() {
         if (userContext.getCachedUser() != null) {
+            log.info("==Retrieved cached user: {}", userContext.getCachedUser().getUsername());
             return userContext.getCachedUser();
         }
+        log.info("==No cached user");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         System.out.println("Ausername = " + username);
         User user = userRepository.findByUserName(username)

@@ -96,6 +96,7 @@ public class AuthApiController {
                 userService.recordFailedAttempt(user.getId());
                 if (userService.isAccountLocked(user)) {
                     log.warn("User {} is now locked due to too many failed attempts.", user.getUsername());
+                    throw new ResponseStatusException(HttpStatus.LOCKED, "Account is locked. Try again later.");
                 }
             });
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
